@@ -47,6 +47,14 @@ open /Applications/DisplayToggle.app
 
 Look for the two-screens icon in the menu bar. There's no Dock icon.
 
+## Regenerate the app icon
+
+```sh
+scripts/make-icon.sh                 # → Resources/AppIcon.icns
+```
+
+The icon is original artwork drawn from plain shapes by `scripts/make-icon.swift`. It doesn't use SF Symbols, whose license forbids them in app icons. `build-app.sh` copies the committed `AppIcon.icns` into the bundle, so you only need to run this after changing the artwork.
+
 ## Run the tests
 
 ```sh

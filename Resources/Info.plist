@@ -4,6 +4,8 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key><string>en</string>
 	<key>CFBundleExecutable</key><string>DisplayToggle</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key><string>com.yuezhu.displaytoggle</string>
 	<key>CFBundleName</key><string>DisplayToggle</string>
 	<key>CFBundleDisplayName</key><string>DisplayToggle</string>
