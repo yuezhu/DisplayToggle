@@ -1,6 +1,6 @@
 public typealias DisplayID = UInt32
 
-/// What DisplayToggle knows about one Display.
+/// What Display Toggle knows about one Display.
 public struct DisplayInfo: Codable, Equatable, Sendable {
     public let id: DisplayID
     public let name: String

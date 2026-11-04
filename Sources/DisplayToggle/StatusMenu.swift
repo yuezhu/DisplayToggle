@@ -18,7 +18,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
     init(controller: DisplayController) {
         self.controller = controller
         super.init()
-        let image = NSImage(systemSymbolName: "display.2", accessibilityDescription: "DisplayToggle")
+        let image = NSImage(systemSymbolName: "display.2", accessibilityDescription: "Display Toggle")
         image?.isTemplate = true
         statusItem.button?.image = image
         menu.delegate = self
@@ -51,7 +51,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         addRow(login)
         loginRow = login
         menu.addItem(.separator())
-        menu.addItem(withTitle: "Quit DisplayToggle", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        menu.addItem(withTitle: "Quit Display Toggle", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
     }
 
     private func addRow(_ view: SwitchRowView) {

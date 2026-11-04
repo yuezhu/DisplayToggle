@@ -12,7 +12,7 @@ public struct DisplayRow: Equatable, Sendable {
     }
 }
 
-/// Owns every DisplayToggle rule: ordering, naming, the last-Active-Display guard,
+/// Owns every Display Toggle rule: ordering, naming, the last-Active-Display guard,
 /// the saved Disabled Displays, restoration and reconciliation. Main-thread only.
 @MainActor
 public final class DisplayController {

@@ -1,4 +1,4 @@
-# DisplayToggle
+# Display Toggle
 
 A tiny macOS menu-bar app that switches displays off and on in software. Turn a display's switch off and macOS forgets it, as if its cable were pulled: windows move to your other displays and the menu bar moves if needed. Turn it back on and the display returns to where it was.
 
@@ -11,7 +11,7 @@ A tiny macOS menu-bar app that switches displays off and on in software. Turn a 
 │ ──────────────────────────────────── │
 │  Launch at Login               [●  ] │
 │ ──────────────────────────────────── │
-│  Quit DisplayToggle              ⌘Q  │
+│  Quit Display Toggle             ⌘Q  │
 └──────────────────────────────────────┘
 ```
 
@@ -40,9 +40,9 @@ The dot before each display name is green when the display is active and grey wh
 ## Build and install
 
 ```sh
-scripts/build-app.sh                 # → build/DisplayToggle.app (ad-hoc signed)
-cp -R build/DisplayToggle.app /Applications/
-open /Applications/DisplayToggle.app
+scripts/build-app.sh                   # → "build/Display Toggle.app" (ad-hoc signed)
+cp -R "build/Display Toggle.app" /Applications/
+open "/Applications/Display Toggle.app"
 ```
 
 Look for the two-screens icon in the menu bar. There's no Dock icon.
@@ -65,7 +65,7 @@ The tests use Swift Testing. The script passes the Testing macro plugin path exp
 
 ## How it works
 
-DisplayToggle calls the private CoreGraphics function `CGSConfigureDisplayEnabled`, looked up at runtime with `dlsym`, inside a normal display-configuration transaction that is completed for the current session only. BetterDisplay and Lunar use the same mechanism. If a future macOS removes the function, the app keeps running and every attempt to disable a display just fails with a beep.
+Display Toggle calls the private CoreGraphics function `CGSConfigureDisplayEnabled`, looked up at runtime with `dlsym`, inside a normal display-configuration transaction that is completed for the current session only. BetterDisplay and Lunar use the same mechanism. If a future macOS removes the function, the app keeps running and every attempt to disable a display just fails with a beep.
 
 Once a display is disabled, macOS no longer lists it at all, so the app saves the disabled displays it is responsible for in `UserDefaults`. That saved list is how it can show them in the menu, bring them back, and recover after a crash.
 

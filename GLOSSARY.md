@@ -1,4 +1,4 @@
-# DisplayToggle
+# Display Toggle
 
 A macOS menu-bar app that lets the user make macOS forget a connected display, and bring it back, without touching the cable.
 
@@ -27,7 +27,7 @@ A Display macOS is currently showing the desktop on.
 _Avoid_: On, enabled display
 
 **Disabled Display**:
-A connected Display that DisplayToggle has made macOS forget; it shows nothing and macOS no longer lists it until it is enabled.
+A connected Display that Display Toggle has made macOS forget; it shows nothing and macOS no longer lists it until it is enabled.
 _Avoid_: Off, sleeping, disconnected, powered-off display
 
 ## Actions

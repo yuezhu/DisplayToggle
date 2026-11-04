@@ -1,4 +1,4 @@
-# DisplayToggle
+# Display Toggle
 
 ## Agent skills
 

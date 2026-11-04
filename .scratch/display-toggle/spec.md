@@ -1,4 +1,4 @@
-# Spec: DisplayToggle menu-bar app
+# Spec: Display Toggle menu-bar app
 
 Status: ready-for-agent
 
@@ -8,11 +8,11 @@ I work on a MacBook Air docked to a DELL U3421WE. Sometimes I want macOS to stop
 
 ## Solution
 
-DisplayToggle is a small menu-bar app (no Dock icon). Its menu lists every Display, the Built-in Display first and the rest alphabetically, each with a macOS-Settings-style switch. Turning a switch off Disables that Display: macOS behaves as if its cable were pulled, moving windows and the Main Display elsewhere. Turning it back on Enables it, restoring it to its previous place. The app refuses to Disable the last Active Display, and it never leaves a Display Disabled when it isn't running: quitting Enables everything, launching Enables anything left Disabled by a crash, and if the last Active Display disappears it Enables everything immediately. Changes last for the login session only.
+Display Toggle is a small menu-bar app (no Dock icon). Its menu lists every Display, the Built-in Display first and the rest alphabetically, each with a macOS-Settings-style switch. Turning a switch off Disables that Display: macOS behaves as if its cable were pulled, moving windows and the Main Display elsewhere. Turning it back on Enables it, restoring it to its previous place. The app refuses to Disable the last Active Display, and it never leaves a Display Disabled when it isn't running: quitting Enables everything, launching Enables anything left Disabled by a crash, and if the last Active Display disappears it Enables everything immediately. Changes last for the login session only.
 
 ## User Stories
 
-1. As a user, I want a menu-bar icon for DisplayToggle, so that the controls are always one click away.
+1. As a user, I want a menu-bar icon for Display Toggle, so that the controls are always one click away.
 2. As a user, I want the app to have no Dock icon or main window, so that it stays out of my way.
 3. As a user, I want the menu-bar icon to be a recognisable two-screens symbol, so that I can find it among other menu-bar items.
 4. As a user, I want the menu to list every Display macOS knows about plus every Display I have Disabled, so that I can control all of them from one place.
@@ -30,9 +30,9 @@ DisplayToggle is a small menu-bar app (no Dock icon). Its menu lists every Displ
 16. As a user, I want a failed toggle to flip the switch back and beep, so that I notice the failure instead of seeing a wrong state.
 17. As a user, I want an "Enable All Displays" item, so that I can restore everything in one click.
 18. As a user, I want "Enable All Displays" to be harmless when nothing is Disabled, so that I can click it without thinking.
-19. As a user, I want quitting DisplayToggle to Enable every Disabled Display, so that quitting never leaves a Display dark with no tool to bring it back.
-20. As a user, I want DisplayToggle to remember which Displays it Disabled across a crash or a kill, so that a crash doesn't strand a Display.
-21. As a user, I want launching DisplayToggle to Enable every Display it remembers as Disabled, so that relaunching after a crash restores my screens.
+19. As a user, I want quitting Display Toggle to Enable every Disabled Display, so that quitting never leaves a Display dark with no tool to bring it back.
+20. As a user, I want Display Toggle to remember which Displays it Disabled across a crash or a kill, so that a crash doesn't strand a Display.
+21. As a user, I want launching Display Toggle to Enable every Display it remembers as Disabled, so that relaunching after a crash restores my screens.
 22. As a user, I want remembered Displays that can't be Enabled (because they were unplugged) to be forgotten silently on launch, so that the menu doesn't fill with ghosts.
 23. As a user, I want a Disabled Display that I re-plug, or that macOS re-detects after sleep, to appear once with its switch on, so that I don't see a duplicate row.
 24. As a user, I want trying to Enable a Disabled Display that has since been unplugged to beep and remove its row, so that stale entries clean themselves up.
@@ -41,9 +41,9 @@ DisplayToggle is a small menu-bar app (no Dock icon). Its menu lists every Displ
 27. As a user with two identical Displays, I want a Disabled one to keep its number while the same identical Displays stay connected, so that the row I'm about to re-Enable is clearly the one I Disabled.
 28. As a user, I want the menu to refresh whenever Displays are plugged, unplugged or rearranged, so that it always reflects reality when I open it.
 29. As a user, I want the menu to rebuild every time I open it, so that it never shows stale names or states.
-30. As a user, I want a "Launch at Login" switch in the menu, so that DisplayToggle is always available without me starting it.
+30. As a user, I want a "Launch at Login" switch in the menu, so that Display Toggle is always available without me starting it.
 31. As a user, I want the "Launch at Login" switch to reflect the real login-item state, so that it matches what System Settings shows.
-32. As a user, I want a "Quit DisplayToggle" item with ⌘Q, so that I can exit the conventional way.
+32. As a user, I want a "Quit Display Toggle" item with ⌘Q, so that I can exit the conventional way.
 33. As a user, I want my Disabled state to reset when I log out or reboot, so that a fresh session always starts with every Display Enabled.
 34. As a user, I want the Main Display to move automatically when I Disable it and return when I Enable it, so that I keep a menu bar and Dock on screen.
 35. As a user, I want the menu to cope with being closed by macOS when I Disable the Display it's on, so that reopening it simply shows the updated state.
