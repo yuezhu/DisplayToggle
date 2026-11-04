@@ -6,6 +6,7 @@ let package = Package(
     platforms: [.macOS(.v14)],
     targets: [
         .target(name: "DisplayToggleCore"),
+        .executableTarget(name: "DisplayToggle", dependencies: ["DisplayToggleCore"]),
         .testTarget(name: "DisplayToggleCoreTests", dependencies: ["DisplayToggleCore"]),
     ]
 )
