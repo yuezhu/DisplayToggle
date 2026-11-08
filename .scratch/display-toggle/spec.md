@@ -28,8 +28,8 @@ Display Toggle is a small menu-bar app (no Dock icon). Its menu lists every Disp
 14. As a user, I want the switch of the last Active Display greyed out with a tooltip explaining why, so that I can never Disable every Display and lose my screen.
 15. As a user, I want the switch to always show the Display's real state, so that the menu never lies to me.
 16. As a user, I want a failed toggle to flip the switch back and beep, so that I notice the failure instead of seeing a wrong state.
-17. As a user, I want an "Enable All Displays" item, so that I can restore everything in one click.
-18. As a user, I want "Enable All Displays" to be harmless when nothing is Disabled, so that I can click it without thinking.
+17. As a user, I want an "Enable All" button, so that I can restore everything in one click.
+18. As a user, I want "Enable All" to be harmless when nothing is Disabled, so that I can click it without thinking.
 19. As a user, I want quitting Display Toggle to Enable every Disabled Display, so that quitting never leaves a Display dark with no tool to bring it back.
 20. As a user, I want Display Toggle to remember which Displays it Disabled across a crash or a kill, so that a crash doesn't strand a Display.
 21. As a user, I want launching Display Toggle to Enable every Display it remembers as Disabled, so that relaunching after a crash restores my screens.
@@ -43,7 +43,7 @@ Display Toggle is a small menu-bar app (no Dock icon). Its menu lists every Disp
 29. As a user, I want the menu to rebuild every time I open it, so that it never shows stale names or states.
 30. As a user, I want a "Launch at Login" switch in the menu, so that Display Toggle is always available without me starting it.
 31. As a user, I want the "Launch at Login" switch to reflect the real login-item state, so that it matches what System Settings shows.
-32. As a user, I want a "Quit Display Toggle" item with ⌘Q, so that I can exit the conventional way.
+32. As a user, I want a "Quit" item with ⌘Q, so that I can exit the conventional way.
 33. As a user, I want my Disabled state to reset when I log out or reboot, so that a fresh session always starts with every Display Enabled.
 34. As a user, I want the Main Display to move automatically when I Disable it and return when I Enable it, so that I keep a menu bar and Dock on screen.
 35. As a user, I want the menu to cope with being closed by macOS when I Disable the Display it's on, so that reopening it simply shows the updated state.
@@ -57,11 +57,11 @@ Display Toggle is a small menu-bar app (no Dock icon). Its menu lists every Disp
 - **Personal use (ADR-0001):** ad-hoc signed, not notarized, minimum macOS 14, no App Store.
 - **Modules:**
   - **Display controller (the deep module, pure logic):** owns ordering, naming, the last-Active-Display guard, the remembered Disabled Displays, restoration, reconciliation, and the no-Active-Display safety net. Produces the menu rows. Depends only on DisplaySystem and a UserDefaults instance; the store is internal, with no port.
-  - **DisplaySystem (the single seam):** the controller's only view of macOS. It has two adapters: the CoreGraphics adapter used by the app, and the in-memory fake used by tests. It offers two operations: list the Active Displays (each with id, name, built-in flag, vendor, model and serial numbers), and set a Display Enabled or Disabled, returning success or failure. The CoreGraphics adapter wraps the display-configuration API, the private function, and `NSScreen` names.
-  - **Status menu (thin AppKit layer):** renders the controller's rows as custom menu-item views (a 12pt status dot, filled green when Active and grey when Disabled, then the name, then a small native switch, fixed width; inside a menu a switch draws grey until the menu is clicked, so the dot carries the state), plus "Enable All Displays", a "Launch at Login" switch row of the same kind, and "Quit". No item uses a checkmark: a checked item makes NSMenu add a checkmark column that indents standard items but not custom views, misaligning the menu. It rebuilds on every open and forwards the switch's new value to the controller. While open, it updates rows in place and only rebuilds when the set of Displays changes, because rebuilding an open NSMenu leaves its window the wrong height. It turns a locked row into the tooltip text, and it calls `SMAppService.mainApp` directly for "Launch at Login" rather than going through a wrapper module.
-  - **App shell:** handles the menu-bar-only app lifecycle. It registers the CoreGraphics display-reconfiguration callback and forwards it to the controller. It calls the controller's Enable All on launch and again on quit.
+  - **DisplaySystem (the single seam):** the controller's only view of macOS. It has two adapters: the CoreGraphics adapter used by the app, and the in-memory fake used by tests. It offers two operations: list the Active Displays (each with id, name, built-in flag, vendor, model and serial numbers, and current resolution in points, which follows rotation), and set a Display Enabled or Disabled, returning success or failure. The CoreGraphics adapter wraps the display-configuration API, the private function, and `NSScreen` names.
+  - **Panel (thin SwiftUI layer):** a `MenuBarExtra` with `.menuBarExtraStyle(.window)`, laid out like Control Center's Wi-Fi and Bluetooth menus. A header holds the title "Display Toggle" and an "Enable All" button, greyed out when nothing is Disabled (there is no master switch, because every Display can never be Disabled at once). Each Display row shows an icon (`laptopcomputer` for the Built-in Display, `display` otherwise) inside a circle filled with the accent colour while Active and grey while Disabled, then the name over a detail line (the resolution, "Disabled", or the locked-row text), then a small native switch. The detail line says "Active" when an Active Display reports no resolution. Because the panel is a key window, its switches draw in colour without help. Below a divider sit a "Launch at Login" switch row and "Quit" (⌘Q). Rows highlight on hover, and clicking anywhere on a row toggles it. A small observable model re-reads the controller's rows after every action, when the panel's own window becomes key, and on display reconfigurations (coalesced to one per run-loop turn); it reads `SMAppService.mainApp` when the panel opens and after a Launch at Login change. Observation skips equal values, so when a switch doesn't end up where the user put it, the model bumps a revision that the panel uses as its identity, rebuilding it from the real state; closing the panel bumps it too. Clicking a row sets the target captured when it was drawn, so a click reaching both row and switch can't flip twice. So no hover highlight survives to the next open. It turns a locked row into the detail text and tooltip, and it calls `SMAppService.mainApp` directly for "Launch at Login" rather than going through a wrapper module.
+  - **App shell:** a SwiftUI `App` whose `NSApplicationDelegate` adaptor handles the menu-bar-only app lifecycle. It registers the CoreGraphics display-reconfiguration callback and forwards it to the controller. It calls the controller's Enable All on launch and again on quit.
 - **Controller interface:** four operations, all main-thread only.
-  - **rows:** an ordered list. Each row has the display id, the display name, whether the Display is Active (the switch position), and whether it is locked.
+  - **rows:** an ordered list. Each row has the display id, the display name, whether the Display is Active (the switch position), whether it is the Built-in Display (for the row icon), its resolution (Active Displays only), and whether it is locked. Each display id appears at most once.
   - **set enabled(display, on/off):** idempotent, so it takes the switch's new value rather than flipping. It returns false if the guard refuses the request or the system call fails.
   - **enable all:** used for launch, quit and the menu item alike. It returns false if any Enable failed, so the menu item can beep.
   - **displays changed:** idempotent, because CoreGraphics also fires the callback after the controller's own changes.
@@ -69,7 +69,7 @@ Display Toggle is a small menu-bar app (no Dock icon). Its menu lists every Disp
   Interface rules beyond the type signatures:
   - Row state always comes from what DisplaySystem reports after the call, never from what was requested.
   - "Locked" means only "this is the last Active Display". The controller returns no UI text.
-- **One restoration operation:** launch, quit and "Enable All Displays" are the same operation.
+- **One restoration operation:** launch, quit and "Enable All" are the same operation.
   - It Enables every remembered Display, then drops every entry that either failed to Enable or now appears as Active.
   - Clearing the store on quit is simply the case where every Enable succeeds.
   - This one operation enforces the rule that nothing is left Disabled while the app isn't running.
@@ -80,7 +80,7 @@ Display Toggle is a small menu-bar app (no Dock icon). Its menu lists every Disp
 - **Display setup changed:**
   1. Drop any remembered entry that matches an Active Display (it was re-plugged or re-detected). An entry matches if it has the same display id, or the same vendor, model and serial **when the serial is non-zero**. Identical Displays that report no serial cannot be told apart, and treating them as the same would make Disabling one of them forget it immediately. The trade-off: a serial-less Display re-plugged under a new id shows a duplicate Disabled row until clicked, at which point the Enable fails and the row is removed.
   2. If no Active Display remains, Enable every remembered Display.
-- **Enable failure on a remembered Display:** remove the entry; the menu beeps, both for a single row and for "Enable All Displays".
+- **Enable failure on a remembered Display:** remove the entry; the menu beeps, both for a single row and for "Enable All".
 - **Disable failure:** the Display stays Active, the switch reverts, and the app beeps.
 - **Truth source:** after any toggle, the row state comes from what DisplaySystem reports, not from what was requested.
 - **Build:** SwiftPM with a library target for the controller and a separate executable target for the app. A script assembles the app bundle (Info.plist with LSUIElement), then signs it ad-hoc.
@@ -108,9 +108,9 @@ Display Toggle is a small menu-bar app (no Dock icon). Its menu lists every Disp
   - A fake whose every Disable fails, which simulates a missing private symbol.
 - **Framework:** Swift Testing (`import Testing`), run with `swift test`. Confirmed working with the installed Command Line Tools (Xcode not installed).
 - **Prior art:** none; this is the first code in the repo.
-- **Not unit-tested (manual checklist):** the CoreGraphics adapter, the AppKit menu views and `SMAppService`. Before calling the work done, check by hand on the real setup:
+- **Not unit-tested (manual checklist):** the CoreGraphics adapter, the SwiftUI panel and `SMAppService`. Before calling the work done, check by hand on the real setup:
   - Disable and Enable the DELL and the Built-in Display, and confirm the windows and Main Display move as expected.
-  - Confirm the menu stays open after a toggle.
+  - Confirm the panel stays open after a toggle and its switches draw in colour as soon as it opens.
   - Confirm the last-display switch is greyed out, with its tooltip.
   - Confirm quitting restores every Display.
   - `kill -9` the app while the DELL is Disabled, relaunch it, and confirm the DELL is restored.
@@ -125,7 +125,7 @@ Display Toggle is a small menu-bar app (no Dock icon). Its menu lists every Disp
 - Special handling for AirPlay, Sidecar, DisplayLink, or mirrored Displays beyond the generic failure behaviour.
 - Automatic relaunch after a crash (KeepAlive LaunchAgent).
 - Notarization, App Store distribution, Sparkle-style updates.
-- Keyboard navigation inside the menu's custom rows.
+- Keyboard navigation inside the panel beyond ⌘Q and Esc.
 
 ## Further Notes
 

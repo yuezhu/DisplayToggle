@@ -4,11 +4,16 @@ public struct DisplayRow: Equatable, Sendable {
     public let id: DisplayID
     public let name: String
     public let isActive: Bool
+    public let isBuiltIn: Bool
+    /// The current resolution of an Active Display; always nil for a Disabled one.
+    public let resolution: Resolution?
     /// True only for the last Active Display: it cannot be Disabled.
     public let isLocked: Bool
 
-    public init(id: DisplayID, name: String, isActive: Bool, isLocked: Bool) {
-        self.id = id; self.name = name; self.isActive = isActive; self.isLocked = isLocked
+    public init(id: DisplayID, name: String, isActive: Bool, isBuiltIn: Bool, resolution: Resolution?,
+                isLocked: Bool) {
+        self.id = id; self.name = name; self.isActive = isActive
+        self.isBuiltIn = isBuiltIn; self.resolution = resolution; self.isLocked = isLocked
     }
 }
 
@@ -35,6 +40,7 @@ public final class DisplayController {
         let names = Self.numberedNames(all.map(\.0))
         return all.map { info, isActive in
             DisplayRow(id: info.id, name: names[info.id] ?? info.name, isActive: isActive,
+                       isBuiltIn: info.isBuiltIn, resolution: isActive ? info.resolution : nil,
                        isLocked: isActive && active.count == 1)
         }
     }
@@ -58,7 +64,9 @@ public final class DisplayController {
         if !enable {
             guard let info = active.first(where: { $0.id == id }) else { return true }
             guard active.count > 1, system.setEnabled(id, false) else { return false }
-            disabledDisplays.append(info)
+            // Replace rather than append: if macOS still listed the Display as Active after an
+            // earlier Disable, it may already be remembered, and each id must appear only once.
+            disabledDisplays = disabledDisplays.filter { $0.id != id } + [info]
             return true
         }
         if active.contains(where: { $0.id == id }) { return true }
@@ -69,7 +77,7 @@ public final class DisplayController {
     }
 
     /// Enable every Disabled Display and forget them all, whether or not each Enable worked.
-    /// Used on launch, on quit and by "Enable All Displays". Returns false if any Enable failed.
+    /// Used on launch, on quit and by "Enable All". Returns false if any Enable failed.
     @discardableResult
     public func enableAll() -> Bool {
         let results = disabledDisplays.map { system.setEnabled($0.id, true) }

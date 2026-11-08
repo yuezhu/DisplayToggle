@@ -27,12 +27,16 @@ final class CGDisplaySystem: DisplaySystem {
             }
         }
         return ids.prefix(Int(count)).map { id in
-            DisplayInfo(id: id,
+            // Bounds, not the display mode: they're in points and follow rotation.
+            let bounds = CGDisplayBounds(id)
+            return DisplayInfo(id: id,
                         name: nameCache[id] ?? "Display \(id)",
                         isBuiltIn: CGDisplayIsBuiltin(id) != 0,
                         vendor: CGDisplayVendorNumber(id),
                         model: CGDisplayModelNumber(id),
-                        serial: CGDisplaySerialNumber(id))
+                        serial: CGDisplaySerialNumber(id),
+                        resolution: bounds.isEmpty ? nil
+                            : Resolution(width: Int(bounds.width), height: Int(bounds.height)))
         }
     }
 

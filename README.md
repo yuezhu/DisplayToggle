@@ -3,34 +3,35 @@
 A tiny macOS menu-bar app that switches displays off and on in software. Turn a display's switch off and macOS forgets it, as if its cable were pulled: windows move to your other displays and the menu bar moves if needed. Turn it back on and the display returns to where it was.
 
 ```
-┌──────────────────────────────────────┐
-│  ●  Built-in Retina Display    [●  ] │
-│  ●  DELL U3421WE               [  ○] │
-│ ──────────────────────────────────── │
-│  Enable All Displays                 │
-│ ──────────────────────────────────── │
-│  Launch at Login               [●  ] │
-│ ──────────────────────────────────── │
-│  Quit Display Toggle             ⌘Q  │
-└──────────────────────────────────────┘
+┌──────────────────────────────────────────┐
+│  Display Toggle             [Enable All] │
+│  (◉)  Built-in Retina Display     [●  ]  │
+│       1512 × 982                         │
+│  (○)  DELL U3421WE                [  ○]  │
+│       Disabled                           │
+│ ──────────────────────────────────────── │
+│  Launch at Login                  [●  ]  │
+│  Quit                                ⌘Q  │
+└──────────────────────────────────────────┘
 ```
 
-The dot before each display name is green when the display is active and grey when it's disabled.
+The panel is laid out like Control Center's Wi-Fi and Bluetooth menus. Each display's icon sits in an accent-coloured circle when the display is active and a grey one when it's disabled.
 
 ## Features
 
-- **One switch per display, with a status dot** (green when active, grey when disabled), because macOS draws switches inside menus grey until you click. The built-in display is always listed first, then the others alphabetically. Clicking either the switch or the name toggles it, and the menu stays open so you can change several displays at once.
-- **You can't lose your last screen.** The switch for the last active display is greyed out.
+- **One switch per display**, with an icon (laptop for the built-in display, monitor for the rest) and a line showing its resolution or that it's disabled. The built-in display is always listed first, then the others alphabetically. Clicking either the switch or anywhere on the row toggles it, and the panel stays open so you can change several displays at once.
+- **Enable All** in the panel's header brings every disabled display back in one click.
+- **You can't lose your last screen.** The switch for the last active display is greyed out, and its row says why.
 - **Nothing stays disabled without the app.**
   - Quitting re-enables every display.
   - After a crash, relaunching the app re-enables anything it left disabled.
   - Logging out or rebooting always brings every display back, because changes only last for the current session.
 - **Plugging and unplugging are handled safely.**
   - A disabled display that you re-plug comes back once, already enabled.
-  - A disabled display that you unplug disappears from the menu.
+  - A disabled display that you unplug disappears from the panel.
   - If the last active display is unplugged, everything is re-enabled immediately.
 - **Identical monitors are numbered** "(1)", "(2)" so you can tell them apart.
-- **Launch at Login** is a switch in the menu, styled like the display switches.
+- **Launch at Login** is a switch in the panel, styled like the display switches.
 
 ## Requirements
 
@@ -63,16 +64,18 @@ scripts/test.sh
 
 The tests use Swift Testing. The script passes the Testing macro plugin path explicitly, because a Command-Line-Tools-only setup doesn't find it on incremental builds.
 
+The Command Line Tools also ship no SwiftUI macro plugin, so the app code can't use `@State`; it uses `@StateObject` and `@Observable` instead.
+
 ## How it works
 
 Display Toggle calls the private CoreGraphics function `CGSConfigureDisplayEnabled`, looked up at runtime with `dlsym`, inside a normal display-configuration transaction that is completed for the current session only. BetterDisplay and Lunar use the same mechanism. If a future macOS removes the function, the app keeps running and every attempt to disable a display just fails with a beep.
 
-Once a display is disabled, macOS no longer lists it at all, so the app saves the disabled displays it is responsible for in `UserDefaults`. That saved list is how it can show them in the menu, bring them back, and recover after a crash.
+Once a display is disabled, macOS no longer lists it at all, so the app saves the disabled displays it is responsible for in `UserDefaults`. That saved list is how it can show them in the panel, bring them back, and recover after a crash.
 
 The code is split into two layers:
 
 - **`DisplayToggleCore`** holds all the rules (ordering, numbering, the last-display guard, the saved list, restore and reconciliation) in one class, `DisplayController`. Its only view of macOS is a small `DisplaySystem` protocol, so it's unit-tested against an in-memory fake.
-- **`DisplayToggle`** is the app itself: the CoreGraphics adapter, the AppKit menu, and the app lifecycle.
+- **`DisplayToggle`** is the app itself: the CoreGraphics adapter, the SwiftUI menu-bar panel, and the app lifecycle.
 
 More background:
 

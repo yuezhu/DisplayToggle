@@ -29,8 +29,8 @@ func freshDefaults() -> UserDefaults {
 
     #expect(!system.isActive(dell.id))
     #expect(c.rows == [
-        DisplayRow(id: 1, name: "Built-in Retina Display", isActive: true, isLocked: true),
-        DisplayRow(id: 3, name: "DELL U3421WE", isActive: false, isLocked: false),
+        DisplayRow(id: 1, name: "Built-in Retina Display", isActive: true, isBuiltIn: true, resolution: builtIn.resolution, isLocked: true),
+        DisplayRow(id: 3, name: "DELL U3421WE", isActive: false, isBuiltIn: false, resolution: nil, isLocked: false),
     ])
 }
 
@@ -136,8 +136,8 @@ func freshDefaults() -> UserDefaults {
     c.displaysChanged()
 
     #expect(c.rows == [
-        DisplayRow(id: 1, name: "Built-in Retina Display", isActive: true, isLocked: false),
-        DisplayRow(id: 8, name: "DELL U3421WE", isActive: true, isLocked: false),
+        DisplayRow(id: 1, name: "Built-in Retina Display", isActive: true, isBuiltIn: true, resolution: builtIn.resolution, isLocked: false),
+        DisplayRow(id: 8, name: "DELL U3421WE", isActive: true, isBuiltIn: false, resolution: nil, isLocked: false),
     ])
 }
 
@@ -164,7 +164,7 @@ func freshDefaults() -> UserDefaults {
     c.displaysChanged()
 
     #expect(system.isActive(builtIn.id))
-    #expect(c.rows == [DisplayRow(id: 1, name: "Built-in Retina Display", isActive: true, isLocked: true)])
+    #expect(c.rows == [DisplayRow(id: 1, name: "Built-in Retina Display", isActive: true, isBuiltIn: true, resolution: builtIn.resolution, isLocked: true)])
 }
 
 @Test @MainActor func displaysChangedRepeatedlyHasNoExtraEffect() {
@@ -237,5 +237,33 @@ func freshDefaults() -> UserDefaults {
 
     #expect(!c.setEnabled(dell.id, false))
     #expect(!c.setEnabled(builtIn.id, false))
+    #expect(c.rows.map(\.isActive) == [true, true])
+}
+
+@Test @MainActor func aDisabledBuiltInDisplayKeepsItsBuiltInFlagAndDropsItsResolution() {
+    let system = FakeDisplaySystem([builtIn, dell])
+    let c = DisplayController(system: system, defaults: freshDefaults())
+
+    #expect(c.setEnabled(builtIn.id, false))
+
+    #expect(c.rows == [
+        DisplayRow(id: 1, name: "Built-in Retina Display", isActive: false, isBuiltIn: true, resolution: nil,
+                   isLocked: false),
+        DisplayRow(id: 3, name: "DELL U3421WE", isActive: true, isBuiltIn: false, resolution: dell.resolution,
+                   isLocked: true),
+    ])
+}
+
+@Test @MainActor func disablingTwiceWhileMacOSLagsBehindStillShowsOneRow() {
+    let system = FakeDisplaySystem([builtIn, dell])
+    let c = DisplayController(system: system, defaults: freshDefaults())
+    system.lingeringDisable = [dell.id]
+    c.setEnabled(dell.id, false)
+    system.lingeringDisable = []
+
+    c.setEnabled(dell.id, false)
+
+    #expect(c.rows.map(\.id) == [builtIn.id, dell.id])
+    #expect(c.setEnabled(dell.id, true))
     #expect(c.rows.map(\.isActive) == [true, true])
 }
